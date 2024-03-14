@@ -29,13 +29,12 @@ embeddings_ = text.apply(get_embedding)
 
 df['embeddings'] = embeddings_
 
-df.to_excel('text.xlsx')
 
-test = pd.read_excel('text.xlsx')
+test = pd.read_csv('text.csv')
 
 
 # print(ChatBot.calc_similarity(pickle.loads(test['embeddings'][0]),pickle.loads(test['embeddings'][1])))
-eastr = test['embeddings'][0]
+astr = test['embeddings'][0]
 
 if not astr.endswith(']'):
     astr += ']'
