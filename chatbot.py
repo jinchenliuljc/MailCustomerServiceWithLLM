@@ -9,7 +9,7 @@ import os
 
 class ChatBot():
 
-  def __init__(self, client, system_for_answer, match_param=100, match_threshold=0.5):
+  def __init__(self, client, system_for_answer, match_param=50, match_threshold=0.5):
     # self.api_key = api_key
 
     # 用于生成测试问题的prompt
@@ -25,7 +25,7 @@ class ChatBot():
     self.match_threshold = match_threshold
 
   @staticmethod
-  def get_embedding(self,text, client, model="text-embedding-3-small"):
+  def get_embedding(text, client, model="text-embedding-3-small"):
     text = text.replace("\n", " ")
     return client.embeddings.create(input = [text], model=model).data[0].embedding
 
@@ -84,7 +84,7 @@ class ChatBot():
 
     # 匹配top k个最相似的问答对，k在类初始化时定义
     df['similarity'] = df['embeddings'].apply(self.calc_similarity,vec2=target)
-    refs = df.nlargest(self.match_param,'similarity')[['Case','Customer question','Customer Service Reply']]
+    refs = df.nlargest(self.match_param,'similarity')[['Customer question','Customer Service Reply']].values
     # 加一个阈值筛选，如果相似度全都太小就不要reference
     # refs = refs[refs['similarity']>self.match_threshold][['Customer question','Customer Service Reply']].values
     print('\n---------------------', refs)
@@ -99,14 +99,13 @@ class ChatBot():
     # if (df['Case']==input['name']).any():
 
     # 取出与该客户的所有邮件往来历史
-    # dialogs = df[df['Case']==input['name']][['Customer question','Customer Service Reply']].values
-    # answer_context = self.form_template('context',dialogs)
+    dialogs = df[df['Case']==input['name']][['Customer question','Customer Service Reply']].values
+    answer_context = self.form_template('context',dialogs)
 
-    answer_context = []
     refs = self.get_refs(input['question'], df)
 
     # 插入system消息
-    refs_ = self.form_template('reference',refs)
+    refs = self.form_template('reference',refs)
     answer_context.insert(0,{"role": "system", "content": self.system_for_answer.format(ref=refs)})
     # answer_context.insert(0,{"role": "system", "content": self.system_for_answer})
     # 插入新问题
@@ -177,79 +176,25 @@ if __name__ == "__main__":
   with open('prompt_for_answer.txt','r') as f:
     prompt_for_answer = f.read()
 
+  df = pd.read_csv('text.csv')
 
+  df['embeddings'] = df['embeddings'].apply(eval)
 
 
   client = OpenAI(api_key=openai_api)
   bot = ChatBot(client, prompt_for_answer)
 
-  # input = {'name': 'Ashley White', 'question': '''Hello, \
-  # Unfortunately my Schenley steam mom has stopped working. \
-  # Order number from Amazon \
-  # 111-6479641-6445847 \
-  # I would appreciate assistance getting it replaced. \
-  # Thank you so much for your time.\
-  # \
-  # Kindly, \
-  # Ashley White '''}
-  # result = bot.main(input, df)
 
-  input = {'name': 'Hermy Tolentino', 'question': '''what is my address \n Kindly,\n Hermy Tolentino'''}
+
+  input = {'name': 'Sevana Hasty', 'question': '''Yes, here is the date and the order number.
+
+Order Placed: August 17, 2023
+Amazon.com order number: 114-0079533-7630677
+ 
+Thanks,
+-Sevana Hasty'''}
   result = bot.main(input, df)
 
 
-  # input = {'name': 'Mary Kelly','question':'''
-  # Hello,
-
-  # I've been using your steam cleaner mop with accessories since September 2023.
-
-  # It worked wonderfully.
-  # Until tonight. I was using the steam cleaner to mop my bathroom floor. There was a loud pop noise and the steam cleaner stopped working. 
-
-  # I also got electrocuted.
-
-  # The steam cleaner turns on but no steam comes out.
-
-  # I have only used tap water, NYC excellent tap water, to fill the steam cleaner reservoir when I'm using it.
-
-  # The reservoir was filled with water when it stopped working.
-  # I emptied the water, waited a few minutes and filled the reservoir with tap water again.
-  # I tried plugging it into a different outlet even though the steamer turns on. 
-
-  # I looked to see if anything was obstructing the steam flow.
-
-  # Then I called Amazon and I trouble shooted with a Customer Service Representative to try and get the Schenley steam cleaner working again. 
-
-  # Nothing worked. The steam cleaner turned on but didn't produce steam.
-
-  # Also , in the past month the Schenley steam cleaner started dripping water from time to time from the bottom of the reservoir. Not a constant dripping of water but from time to time while using the steam cleaner a few drops of water would splash out of it. It was dripping from the bottom of the reservoir. The steam cleaner was working though so I didn't really notice
-  # I noticed it now. IT ELECTROCUTED ME!
-
-  # There are no cracks or holes in the reservoir except for the hole where the water goes into the reservoir.
-  # I've never dropped the steam cleaner either. 
-
-  # I just tried to use the steam cleaner again. 
-  # I think that the reservoir has a leak around the edges that I can't see. Water is running out of the edges on the of the reservoir as well as the area where the plug comes out in a thin but steady stream now.
-
-  # That's when I got electrocuted. The water leaked onto the handle of the steam cleaner when I pointed it upwards and I got electrocuted. Also, NOW  the steam cleaner won't turn on.
-  # It made a bunch of noises and shut off.
-
-  # I wouldn't touch it again anyway.
-  # I'm not risking electrocution again.
-
-  # Please provide me with a new steam cleaner or one that works or a refund. 
-
-  # I  have health issues. I need the steam cleaner for my health. It cleaned my apartment very well by killing dust mites and bacteria and disinfecting my apartment. Once I use the steam cleaner I breathe better. But now it's broken completely. AND I got electrocuted!
-
-  # I almost bought a different steam cleaner but I thought that your steam cleaner was better even though it cost more money. Please don't make me regret my choice of buying your product. I can't believe that I only had it for about 3 1/2 months and already it's broken. I can't believe that I got electrocuted!!!
-
-  # Please find attached a screenshot of proof of my purchase of the Schenley steam cleaner from Amazon. 
-
-  # I look forward to hearing from you.
-  # Best regards,
-  # Mary Kelly
-  # '''}
-
-  result = bot.main(input,df)
 
   print('---------------------------\n',result)
