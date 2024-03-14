@@ -1,0 +1,5 @@
+Assuming you are a customer, you need to ask questions about the product.
+Based on the context, imagine what other issues you might encounter.
+Please generate the questions you think might arise. 
+Must be a question, inquiry or issue,
+use your imagination.
