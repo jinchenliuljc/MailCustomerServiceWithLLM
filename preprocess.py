@@ -11,6 +11,8 @@ import ast
 #     embeddings = client.embeddings.create(input = [text], model=model).data[0].embedding
 #     return embeddings
 
+#这个文件中定义的方法接受excel并将问题转换为embedding再暂存，读数据时可以使用read_data方法。
+
 def preprocess(filename):
 
     pd.set_option('display.max_colwidth', None)

@@ -104,30 +104,23 @@ class ChatBot():
 
 
     refs = self.get_refs(input['question'], df)
-    # refs = df[['Customer question','Customer Service Reply']].values
-    # print(refs.head())
-    # with open('dataframe.txt','w') as f:
-    #   f.write(refs)
+ 
     # 插入system消息
     refs_ = self.form_template('reference',refs)
 
     # print(refs_)
     answer_context.insert(0,{"role": "system", "content": self.system_for_answer.format(ref=refs_)})
-    # print(answer_context)
-    # answer_context.insert(0,{"role": "system", "content": self.system_for_answer})
-    # 插入新问题
+
     answer_context.append({"role": "user", "content": input['question']})
 
     print(answer_context[1])
 
     # 生成回答
     answer,usage = self.get_completion(self.client,answer_context)
-    # answer_context = self.form_template('context',dialogs)
 
     return answer,usage
 
-  # with open('/content/drive/MyDrive/customer_rep.pickle','rb') as f:
-  #   df = pickle.load(f)
+
 
   def test(self, df):
   #存储测试问答
@@ -175,12 +168,7 @@ class Classifier(ChatBot):
 if __name__ == "__main__":
   openai_api = os.environ['OPENAI_API_KEY']
 
-
-  # pickle文件是一个dataframe，和源excel的区别是多出一列包含所有问题的embedding，在未来应该是在存储知识到知识库时就做好embedding
-  # with open('customer_rep.pickle','rb') as f:
-  #   df = pickle.load(f)
-
-  df = pd.read_excel('reply.xlsx').astype('str')
+  df = pd.read_excel('data/reply.xlsx').astype('str')
 
   with open('prompt_for_answer.txt','r') as f:
     prompt_for_answer = f.read()
@@ -191,16 +179,7 @@ if __name__ == "__main__":
   client = OpenAI(api_key=openai_api)
   bot = ChatBot(client, prompt_for_answer)
 
-  # input = {'name': 'Ashley White', 'question': '''Hello, \
-  # Unfortunately my Schenley steam mom has stopped working. \
-  # Order number from Amazon \
-  # 111-6479641-6445847 \
-  # I would appreciate assistance getting it replaced. \
-  # Thank you so much for your time.\
-  # \
-  # Kindly, \
-  # Ashley White '''}
-  # result = bot.main(input, df)
+
 
   input = {'name': 'Narumit', 'question': '''Thank you for your reply. I actually bought 2 of them from Amazon.com, but I only kept one of the original package. 
 
@@ -213,59 +192,5 @@ Thank you,
 Narumit '''}
   result = bot.main(input, df)
 
-
-  # input = {'name': 'Mary Kelly','question':'''
-  # Hello,
-
-  # I've been using your steam cleaner mop with accessories since September 2023.
-
-  # It worked wonderfully.
-  # Until tonight. I was using the steam cleaner to mop my bathroom floor. There was a loud pop noise and the steam cleaner stopped working. 
-
-  # I also got electrocuted.
-
-  # The steam cleaner turns on but no steam comes out.
-
-  # I have only used tap water, NYC excellent tap water, to fill the steam cleaner reservoir when I'm using it.
-
-  # The reservoir was filled with water when it stopped working.
-  # I emptied the water, waited a few minutes and filled the reservoir with tap water again.
-  # I tried plugging it into a different outlet even though the steamer turns on. 
-
-  # I looked to see if anything was obstructing the steam flow.
-
-  # Then I called Amazon and I trouble shooted with a Customer Service Representative to try and get the Schenley steam cleaner working again. 
-
-  # Nothing worked. The steam cleaner turned on but didn't produce steam.
-
-  # Also , in the past month the Schenley steam cleaner started dripping water from time to time from the bottom of the reservoir. Not a constant dripping of water but from time to time while using the steam cleaner a few drops of water would splash out of it. It was dripping from the bottom of the reservoir. The steam cleaner was working though so I didn't really notice
-  # I noticed it now. IT ELECTROCUTED ME!
-
-  # There are no cracks or holes in the reservoir except for the hole where the water goes into the reservoir.
-  # I've never dropped the steam cleaner either. 
-
-  # I just tried to use the steam cleaner again. 
-  # I think that the reservoir has a leak around the edges that I can't see. Water is running out of the edges on the of the reservoir as well as the area where the plug comes out in a thin but steady stream now.
-
-  # That's when I got electrocuted. The water leaked onto the handle of the steam cleaner when I pointed it upwards and I got electrocuted. Also, NOW  the steam cleaner won't turn on.
-  # It made a bunch of noises and shut off.
-
-  # I wouldn't touch it again anyway.
-  # I'm not risking electrocution again.
-
-  # Please provide me with a new steam cleaner or one that works or a refund. 
-
-  # I  have health issues. I need the steam cleaner for my health. It cleaned my apartment very well by killing dust mites and bacteria and disinfecting my apartment. Once I use the steam cleaner I breathe better. But now it's broken completely. AND I got electrocuted!
-
-  # I almost bought a different steam cleaner but I thought that your steam cleaner was better even though it cost more money. Please don't make me regret my choice of buying your product. I can't believe that I only had it for about 3 1/2 months and already it's broken. I can't believe that I got electrocuted!!!
-
-  # Please find attached a screenshot of proof of my purchase of the Schenley steam cleaner from Amazon. 
-
-  # I look forward to hearing from you.
-  # Best regards,
-  # Mary Kelly
-  # '''}
-
-  # result = bot.main(input,df)
 
   print('---------------------------\n',result)
